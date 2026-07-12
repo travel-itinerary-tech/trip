@@ -167,7 +167,7 @@ img{max-width:100%;display:block}
 .day-head{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
 .day-head .daynum{width:34px;height:34px;flex:none;border-radius:10px;background:var(--accent);color:var(--accent-contrast);display:grid;place-items:center;font-weight:800;font-family:var(--font-display)}
 .day-head input{flex:1;min-width:120px}
-.spot-edit{display:grid;grid-template-columns:88px 1fr auto;gap:8px;align-items:start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px}
+.spot-edit{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:8px;align-items:start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px}
 .spot-edit .col-main{display:flex;flex-direction:column;gap:6px}
 .spot-edit .catrow{display:flex;gap:6px;flex-wrap:wrap}
 .spot-edit select{flex:none;width:120px}
@@ -415,7 +415,7 @@ img{max-width:100%;display:block}
 @media (max-width:560px){
   .brand .tag{display:none}
   .row2{grid-template-columns:1fr}
-  .spot-edit{grid-template-columns:70px 1fr auto}
+  .spot-edit{grid-template-columns:70px minmax(0,1fr) auto}
   .spot-edit select{width:100%}
   .booklet-cover h2,.booklet-cover .dest{max-width:100%}
   .booklet-cover .cov-illust{opacity:.4}
@@ -670,6 +670,7 @@ body.pd-active{-webkit-user-select:none;user-select:none;-webkit-touch-callout:n
 /* 画面遷移 */
 #main.view-in{animation:viewIn .34s cubic-bezier(.22,.61,.36,1) both}
 html{scroll-behavior:smooth}
+html,body{overflow-x:clip} /* 横はみ出しの最終ガード */
 
 /* テーマ/色のなめらか切替 */
 body,.card,.btn,.panel,.info-box,.tl-card,.map-wrap,.rally-hero,.booklet,.modal,.ach,.fav-row,.geo-chip,.day-block,.spot-edit{transition:background-color .4s ease,color .35s ease,border-color .4s ease}
@@ -891,6 +892,33 @@ body,.card,.btn,.panel,.info-box,.tl-card,.map-wrap,.rally-hero,.booklet,.modal,
   .fab{padding:14px 19px;font-size:14px}
 }
 @keyframes sheetUp{from{transform:translateY(48px);opacity:.4}to{transform:none;opacity:1}}
+/* ================= 携帯版はみ出し一括修正 =================
+   原因：グリッド/フレックス子要素の min-width:auto により、入力欄の固有幅が
+   列を押し広げて枠外にあふれる（PCは幅に余裕があり顕在化しない） */
+#main,.day-block,.day-head,.spot-edit,.spot-edit .col-main,.spot-edit .catrow,
+.chk-edit,.reso-edit,.leg-edit,.field,.modal-body,.qa-a,.loc-row,.wx-row{min-width:0}
+input,select,textarea{max-width:100%;box-sizing:border-box}
+.spot-edit .col-main>input,.spot-edit .col-main>textarea{width:100%;min-width:0}
+.spot-edit .catrow>*{min-width:0}
+.chk-edit input{min-width:0}
+.day-head input{min-width:0}
+.leg-edit input,.leg-edit select{max-width:110px}
+@media (max-width:560px){
+  .spot-edit{grid-template-columns:58px minmax(0,1fr) auto;gap:6px;padding:9px 8px}
+  .spot-edit>input:first-child{padding:10px 6px;font-size:13px;text-align:center}
+  .spot-edit .catrow{gap:5px}
+  .spot-edit .catrow select{width:100%}
+  .spot-edit .catrow input[type=number]{width:70px;flex:none}
+  .spot-edit .catrow input:not([type=number]){flex:1 1 110px;min-width:0}
+  .day-head input[type=date]{flex:1 1 130px;max-width:none}
+  .day-head input:not([type=date]){flex:1 1 100px}
+  .day-block{padding:11px 9px}
+  .cat-suggest .cs-chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .addr-hint{overflow-wrap:anywhere}
+  .spot-ctrls{gap:3px}
+  .spot-ctrls .icon-btn{min-width:34px;min-height:34px;padding:4px}
+  .field input,.field textarea,.field select,.spot-edit input,.spot-edit textarea,.spot-edit select{font-size:16px} /* iOS Safariの自動ズーム防止（16px未満だと入力時に拡大される） */
+}
 /* ---- ① モバイルにもPC同等のアニメーション体験（ホバーの代わりにタップ反応） ---- */
 @media (hover:none){
   .card:active{transform:translateY(-2px) scale(.985);box-shadow:var(--shadow)}
@@ -927,6 +955,25 @@ body,.card,.btn,.panel,.info-box,.tl-card,.map-wrap,.rally-hero,.booklet,.modal,
 .sns-line{background:#06C755}
 .sns-x{background:#0f1419}
 .sns-fb{background:#1877F2}
+.sns-ig{background:linear-gradient(45deg,#F58529,#DD2A7B 55%,#8134AF 85%,#515BD4)}
+/* ログイン・アカウント */
+.login-opts{display:flex;flex-direction:column;gap:12px}
+.login-g{background:#fff;color:#3c4043;border:1.5px solid #dadce0;display:flex;align-items:center;justify-content:center;gap:9px}
+.login-g:hover{background:#f7f8f8}
+.login-sep{display:flex;align-items:center;gap:10px;color:var(--text-muted);font-size:12px}
+.login-sep::before,.login-sep::after{content:"";flex:1;height:1px;background:var(--border-strong)}
+#hd-acct{display:inline-flex;align-items:center;gap:6px;max-width:160px}
+.acct-ava{width:20px;height:20px;border-radius:50%;object-fit:cover}
+.acct-ava.lg{width:46px;height:46px}
+.acct-ini{width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--accent-contrast);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.acct-ini.lg{width:46px;height:46px;font-size:20px}
+.acct-nm{max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-card{display:flex;gap:14px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.acct-card b{display:block;font-size:15px}
+.acct-card small{display:block;font-size:12px;color:var(--text-muted)}
+.acct-prov{margin-top:3px;font-weight:700}
+.app-ver{opacity:.85}
+@media (max-width:560px){.acct-nm{display:none}#hd-acct{max-width:none}}
 .sns-native{background:var(--accent);color:var(--accent-contrast)}
 @media (min-width:561px){.sns-row{grid-template-columns:repeat(4,1fr)}}
 /* ================= ③ 起動アニメーション強化 ================= */
@@ -971,6 +1018,7 @@ body,.card,.btn,.panel,.info-box,.tl-card,.map-wrap,.rally-hero,.booklet,.modal,
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="author" content="旅のしおり運営者">
 <meta name="format-detection" content="telephone=no">
+<meta name="app-version" content="25">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"旅のしおり","alternateName":"TABI NO SHIORI","url":"https://example.com/tabi-shiori.html","description":"行き先や日程をまとめ、写真で思い出をのこし、訪れた市区町村を日本地図で塗りつぶせる無料の旅のしおり作成Webアプリ。","inLanguage":"ja"}
 </script>
@@ -1013,6 +1061,7 @@ body,.card,.btn,.panel,.info-box,.tl-card,.map-wrap,.rally-hero,.booklet,.modal,
     <div><h1>旅のしおり</h1><div class="tag">TABI NO SHIORI</div></div>
   </div>
   <div class="header-spacer"></div>
+  <button class="header-btn" id="hd-acct" onclick="App.accountModal()">👤 ログイン</button>
   <button class="header-btn" onclick="App.go('help')" title="使い方・Q&A">❓ 使い方</button>
   <button class="header-btn" onclick="App.openImport()">読み込み</button>
   <button class="header-btn primary" onclick="App.newTrip()">＋ 新規作成</button>
@@ -1038,7 +1087,7 @@ body,.card,.btn,.panel,.info-box,.tl-card,.map-wrap,.rally-hero,.booklet,.modal,
       <a onclick="App.go('privacy')">プライバシーポリシー</a>
       <a onclick="App.go('terms')">利用規約・免責事項</a>
     </nav>
-    <div class="sf-copy">© <span id="sf-year"></span> 旅のしおり ／ 地図データ：国土数値情報（国土交通省）を加工・Natural Earth</div>
+    <div class="sf-copy">© <span id="sf-year"></span> 旅のしおり ／ 地図データ：国土数値情報（国土交通省）を加工・Natural Earth ／ <span class="app-ver">Ver.<span id="app-ver"></span></span></div>
   </div>
 </footer>
 
@@ -1151,6 +1200,9 @@ body,.card,.btn,.panel,.info-box,.tl-card,.map-wrap,.rally-hero,.booklet,.modal,
 </script>
 <script>
 "use strict";
+const APP_VERSION="25";
+/* ▼Googleでログインを有効化する場合：Google Cloud ConsoleでOAuthクライアントID（ウェブ）を作成し、公開ドメインを承認済みオリジンに登録のうえ、下記に設定してください */
+const GOOGLE_CLIENT_ID="";
 /* =========================================================================
    旅のしおり v2
    保存: localStorage（しおり）+ IndexedDB（写真, 不可時はメモリ代替）
@@ -2539,7 +2591,9 @@ const App={
       利用者が地図リンクや予約リンクを開いた場合、リンク先の事業者に検索クエリ（スポット名・座標等）やIPアドレス等が送信されます。現在地機能で表示される経路リンクを開いた場合は、経路検索のために現在地の座標がリンク先（Google等）に送信されます。利用目的：各事業者によるサービスの提供。</p>
       <p><b>（4）広告配信（Google AdSense / 提供者：Google LLC）※広告を掲載する場合</b><br>
       送信される情報：Cookie・広告識別子、閲覧ページのURL、IPアドレス等。利用目的：広告の配信・表示回数の計測・不正防止。詳細は次条をご覧ください。</p>
-      <p><b>（5）アクセス解析（Google Analytics / 提供者：Google LLC）※導入する場合</b><br>
+      <p><b>（5）Googleでログイン（Google Identity Services / 提供者：Google LLC）※利用者がGoogleログインを実行した場合のみ</b><br>
+      ログイン用スクリプトの取得と認証のため、利用者の端末からGoogleのサーバーへリクエストが送信されます。送信される情報：IPアドレス、ブラウザ情報、Googleアカウントの認証情報（Google側で処理）。当サイトが受け取るのは氏名・メールアドレス・プロフィール画像のみで、端末内にのみ保存します。利用目的：ログイン（本人表示）機能の提供。</p>
+      <p><b>（6）アクセス解析（Google Analytics / 提供者：Google LLC）※導入する場合</b><br>
       送信される情報：Cookie等の識別子、閲覧ページ、IPアドレス、ブラウザ情報等。利用目的：サイトの利用状況の分析・改善。データは匿名で収集され、個人を特定するものではありません。</p>
       <h3>4. 広告の配信について</h3>
       <p>当サイトでは、第三者配信の広告サービス（Google AdSense）を利用する場合があります。Googleなどの第三者配信事業者は、Cookieを使用して、利用者が当サイトや他のサイトに過去にアクセスした際の情報に基づいて広告を配信します。Googleが広告Cookieを使用することにより、Googleやそのパートナーは、当サイトや他のサイトへのアクセス情報に基づいて、利用者に適切な広告を表示できます。</p>
@@ -2597,9 +2651,73 @@ const App={
     </article>`;
   },
   acceptCookies(){try{localStorage.setItem("tabi_cookie_ok","1");}catch(e){}const el=document.getElementById("cookie-notice");if(el){el.classList.add("bye");setTimeout(()=>el.remove(),320);}},
+  /* ---------- ログイン（端末内プロフィール） ---------- */
+  profile(){try{return JSON.parse(localStorage.getItem("tabi_profile_v1")||"null");}catch(e){return null;}},
+  setProfile(p){try{localStorage.setItem("tabi_profile_v1",JSON.stringify(p));}catch(e){}this.renderAcctChip();},
+  logout(){try{localStorage.removeItem("tabi_profile_v1");}catch(e){}this.renderAcctChip();this.closeModal();toast("ログアウトしました");if(this.view==="home")this.go("home");},
+  renderAcctChip(){const b=document.getElementById("hd-acct");if(!b)return;const p=this.profile();
+    if(!p){b.innerHTML="👤 ログイン";b.title="ログイン";return;}
+    const ini=esc((p.name||p.email||"?").trim().charAt(0));
+    b.innerHTML=(p.picture?`<img class="acct-ava" src="${esc(p.picture)}" alt="" referrerpolicy="no-referrer">`:`<span class="acct-ini">${ini}</span>`)+`<span class="acct-nm">${esc((p.name||p.email).split("@")[0])}</span>`;
+    b.title=(p.name||"")+" "+(p.email||"");},
+  accountModal(){
+    const p=this.profile();
+    if(p){
+      const body=`<div class="acct-card">${p.picture?`<img class="acct-ava lg" src="${esc(p.picture)}" alt="" referrerpolicy="no-referrer">`:`<span class="acct-ini lg">${esc((p.name||p.email||"?").charAt(0))}</span>`}
+        <div><b>${esc(p.name||"（名前未設定）")}</b><small>${esc(p.email||"")}</small><small class="acct-prov">${p.provider==="google"?"Googleでログイン中":"メールアドレスでログイン中"}</small></div></div>
+        <p style="font-size:12px;color:var(--text-muted)">ログイン情報はこの端末内にのみ保存されます。しおりのデータは引き続き端末内保存で、クラウド同期は行われません。</p>`;
+      this.modal("👤 アカウント",body,[{label:"閉じる",ghost:true,fn:()=>this.closeModal()},{label:"ログアウト",fn:()=>this.logout()}]);
+      return;
+    }
+    const body=`<div class="login-opts">
+        <button class="btn login-g" onclick="App.googleLogin()"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.5l6.3 5.3C41.4 35.3 44 30.1 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg> Googleでログイン</button>
+        <div id="gsi-btn" style="display:flex;justify-content:center"></div>
+        <div class="login-sep"><span>または</span></div>
+        <div class="field"><label>お名前（表示名）</label><input id="lg-name" placeholder="例：山田 太郎"></div>
+        <div class="field"><label>メールアドレス</label><input id="lg-mail" type="email" placeholder="you@example.com"></div>
+        <button class="btn wide" onclick="App.emailLogin()">✉️ メールアドレスでログイン</button>
+      </div>
+      <p style="font-size:11.5px;color:var(--text-muted);margin-top:12px">ログインは<b>この端末内のプロフィール設定</b>です（パスワードは不要・サーバーへの登録はありません）。しおりのデータはログインの有無にかかわらず端末内に保存されます。</p>`;
+    this.modal("👤 ログイン",body,[{label:"閉じる",ghost:true,fn:()=>this.closeModal()}]);
+  },
+  emailLogin(){
+    const name=(document.getElementById("lg-name").value||"").trim();
+    const mail=(document.getElementById("lg-mail").value||"").trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){toast("メールアドレスの形式をご確認ください");return;}
+    this.setProfile({name:name||mail.split("@")[0],email:mail,provider:"email"});
+    this.closeModal();this.celebrate();toast(`ようこそ、${name||mail.split("@")[0]}さん！`);
+  },
+  googleLogin(){
+    if(!GOOGLE_CLIENT_ID){
+      this.closeModal();
+      setTimeout(()=>this.modal("Googleでログインの設定",
+        `<p>Googleでログインを有効にするには、サイト公開者による初期設定が必要です。</p>
+         <p style="font-size:12.5px;color:var(--text-muted)">① <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>でOAuthクライアントID（ウェブアプリケーション）を作成<br>② 公開ドメインを「承認済みのJavaScript生成元」に登録<br>③ 本ファイル内の <b>GOOGLE_CLIENT_ID</b> に設定して再アップロード</p>
+         <p style="font-size:12.5px">それまでは「メールアドレスでログイン」をご利用ください。</p>`,
+        [{label:"閉じる",ghost:true,fn:()=>this.closeModal()},{label:"メールでログイン",fn:()=>{this.closeModal();setTimeout(()=>this.accountModal(),60);}}]),60);
+      return;
+    }
+    const ready=()=>{try{
+      google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:res=>{try{
+        const pl=JSON.parse(decodeURIComponent(escape(atob(res.credential.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))));
+        this.setProfile({name:pl.name||"",email:pl.email||"",picture:pl.picture||"",provider:"google"});
+        this.closeModal();this.celebrate();toast(`ようこそ、${pl.name||pl.email}さん！`);
+      }catch(e){toast("ログイン情報の読み取りに失敗しました");}}});
+      const host=document.getElementById("gsi-btn");
+      if(host)google.accounts.id.renderButton(host,{theme:"outline",size:"large",text:"signin_with",locale:"ja"});
+      google.accounts.id.prompt();
+    }catch(e){toast("Googleログインを開始できませんでした");}};
+    if(window.google&&google.accounts&&google.accounts.id){ready();return;}
+    const sc=document.createElement("script");sc.src="https://accounts.google.com/gsi/client";sc.async=true;sc.defer=true;
+    sc.onload=ready;sc.onerror=()=>toast("Googleログインの読み込みに失敗しました（オンライン時のみ利用できます）");
+    document.head.appendChild(sc);
+  },
   initSiteChrome(){
-    // フッター年号
+    // フッター年号・バージョン
     const y=document.getElementById("sf-year");if(y)y.textContent=String(new Date().getFullYear());
+    const av=document.getElementById("app-ver");if(av)av.textContent=APP_VERSION;
+    try{console.log("旅のしおり Ver."+APP_VERSION);}catch(e){}
+    this.renderAcctChip();
     // Cookie通知（未同意時のみ）
     try{if(!localStorage.getItem("tabi_cookie_ok")){const c=document.getElementById("cookie-notice");if(c)c.hidden=false;}}catch(e){}
     // スクロール進捗＆トップへ戻る
@@ -2641,6 +2759,7 @@ const App={
       ["市区町村が制覇マップに反映されません。","住所に「〜市／区／町／村」が含まれていると自動反映されます。スポット名だけの場合は住所欄に市区町村を追記してください。"],
       ["オフラインでも使えますか？","はい。一度開けば地図・アイコンも内蔵のためオフラインで動作します。地図リンク・予約サイトを開くときと、天気予報・現在地機能を使うときのみ通信が必要です。"],
       ["アニメーションを減らせますか？","端末の「視差効果を減らす／動きを減らす」をオンにすると、季節の演出を含む各種アニメが自動で抑制されます。"],
+      ["ログインすると何ができますか？データはどこに保存されますか？","ログインは端末内のプロフィール設定で、名前の表示などに使われます。<b>パスワード不要・サーバーへの登録なし</b>で、しおりのデータはログインの有無にかかわらずこの端末のブラウザ内に保存されます（クラウド同期はありません）。Googleでログインは、サイト公開者がGoogleのクライアントIDを設定した場合に利用できます。"],
       ["天気予報や現在地機能もオフラインで使えますか？","この2つだけは通信が必要です。天気予報はインターネット接続時に取得し、現在地機能はブラウザの位置情報の許可（https接続）が必要です。それ以外の機能はオフラインで動作します。"],
     ];
     return `<button class="back-link" onclick="App.go('home')">← 一覧へ</button>
@@ -3191,6 +3310,7 @@ const App={
         <a class="sns-btn sns-line" href="https://social-plugins.line.me/lineit/share?url=${eu}" target="_blank" rel="noopener noreferrer">LINE</a>
         <a class="sns-btn sns-x" href="https://twitter.com/intent/tweet?text=${et}&url=${eu}" target="_blank" rel="noopener noreferrer">X (Twitter)</a>
         <a class="sns-btn sns-fb" href="https://www.facebook.com/sharer/sharer.php?u=${eu}" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <button class="sns-btn sns-ig" id="sns-ig">Instagram</button>
         <button class="sns-btn sns-native" id="sns-native">📤 その他のアプリ</button>
       </div>
       <div class="field" style="margin-top:12px"><label>共有リンク（開くと相手のしおり一覧に追加されます）</label>
@@ -3204,6 +3324,10 @@ const App={
     const nb=document.getElementById("sns-native");
     if(nb){if(navigator.share){nb.onclick=async()=>{try{await navigator.share({title:t.title||"旅のしおり",text,url});}catch(e){}};}
       else nb.style.display="none";}
+    const ig=document.getElementById("sns-ig");
+    if(ig){ig.onclick=async()=>{try{if(navigator.clipboard)await navigator.clipboard.writeText(url);}catch(e){}
+      toast("リンクをコピーしました。Instagramのストーリーズ・DM・プロフィール等に貼り付けて共有できます");
+      setTimeout(()=>window.open("https://www.instagram.com/","_blank","noopener"),600);};}
   },
   exportJson(t){const c=Object.assign({},t);delete c.id;const blob=new Blob([JSON.stringify(c,null,2)],{type:"application/json"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`shiori_${(t.title||"trip").replace(/[\\/:*?"<>|\s]+/g,"_")}.json`;a.click();URL.revokeObjectURL(a.href);toast("JSONを書き出しました");},
