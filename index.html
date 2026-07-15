@@ -973,7 +973,8 @@ body,.card,.btn,.panel,.info-box,.tl-card,.map-wrap,.rally-hero,.booklet,.modal,
 .qa-a b{color:var(--text)}
 /* ============ Web公開向けUI ============ */
 /* スプラッシュ（初回起動演出） */
-.splash{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;background:var(--header-bg);color:var(--header-text);opacity:0;pointer-events:none;transition:opacity .5s ease}
+.splash{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;background:var(--header-bg);color:var(--header-text);opacity:1;pointer-events:auto;transition:opacity .5s ease;animation:splashSafeHide .6s ease 6s forwards}
+@keyframes splashSafeHide{to{opacity:0;visibility:hidden}}
 .splash.play{opacity:1;pointer-events:auto}
 .splash.out{opacity:0;pointer-events:none}
 .splash-inner{text-align:center}
@@ -1334,9 +1335,9 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
 @keyframes wiggleY{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
 /* ===== v36 起動アニメーション強化（毎回再生） ===== */
-.splash.play .sp-route{animation:routeMarch 1.6s linear .55s infinite,viewIn .5s ease .55s both}
+.splash .sp-route{animation:routeMarch 1.6s linear .55s infinite,viewIn .5s ease .55s both}
 @keyframes routeMarch{to{stroke-dashoffset:-24}}
-.splash.play .sp-plane-g{animation:planeFly 1.5s cubic-bezier(.5,.05,.35,1) .6s both}
+.splash .sp-plane-g{animation:planeFly 1.5s cubic-bezier(.5,.05,.35,1) .6s both}
 @keyframes planeFly{
   0%{transform:translate(-170px,12px) rotate(9deg);opacity:0}
   12%{opacity:1}
@@ -1348,7 +1349,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
   font-family:var(--font-display);font-size:10px;letter-spacing:.2em;font-weight:700;line-height:1.3;
   opacity:0;transform:rotate(-14deg) scale(1.7);pointer-events:none}
 .splash-stamp span{font-size:15px;letter-spacing:0}
-.splash.play .splash-stamp{animation:stampPress .5s cubic-bezier(.2,2.4,.4,.8) 1.55s both}
+.splash .splash-stamp{animation:stampPress .5s cubic-bezier(.2,2.4,.4,.8) 1.55s both}
 @keyframes stampPress{0%{opacity:0;transform:rotate(-24deg) scale(1.8)}60%{opacity:.85;transform:rotate(-10deg) scale(.94)}100%{opacity:.72;transform:rotate(-14deg) scale(1)}}
 .splash-inner{position:relative}
 @media (max-width:560px){.splash-stamp{right:-16px;top:-26px;width:62px;height:62px;font-size:8.5px}}
@@ -1356,6 +1357,14 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
 .splash.quick .splash-title i{opacity:1;transform:none;animation:none}
 .splash.quick .splash-title,.splash.quick .splash-sub,.splash.quick .splash-mark,.splash.quick .splash-route{opacity:1;animation:none}
 .splash.quick .splash-stamp{opacity:.72;transform:rotate(-14deg);animation:none}
+@media (prefers-reduced-motion:reduce){
+  .splash{animation:splashSafeHide .4s ease 1.2s forwards}
+  .splash .splash-title,.splash .splash-sub,.splash .splash-mark,.splash .splash-route{opacity:1;animation:none}
+  .splash .splash-title i{opacity:1;transform:none;animation:none}
+  .splash .sp-plane-g,.splash .sp-route{animation:none}
+  .splash .splash-stamp{opacity:.72;transform:rotate(-14deg);animation:none}
+  .splash .sp-star{stroke-dashoffset:0;animation:none}
+}
 
 /* ===== v37 タッチ同等反応（携帯でPC版ホバーと同じ挙動に） ===== */
 @media (hover:none){
@@ -1511,7 +1520,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="author" content="旅のしおり運営者">
 <meta name="format-detection" content="telephone=no">
-<meta name="app-version" content="37">
+<meta name="app-version" content="38">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"旅のしおり","alternateName":"TABI NO SHIORI","url":"https://example.com/tabi-shiori.html","description":"行き先や日程をまとめ、写真で思い出をのこし、訪れた市区町村を日本地図で塗りつぶせる無料の旅のしおり作成Webアプリ。","inLanguage":"ja"}
 </script>
@@ -1693,7 +1702,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
 </script>
 <script>
 "use strict";
-const APP_VERSION="37";
+const APP_VERSION="38";
 /* =========================================================================
    旅のしおり v2
    保存: localStorage（しおり）+ IndexedDB（写真, 不可時はメモリ代替）
@@ -3313,10 +3322,10 @@ const App={
     const sp=document.getElementById("splash");
     const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if(sp){
-      if(reduce){sp.classList.add("quick");
-        setTimeout(()=>{sp.classList.add("out");setTimeout(()=>sp.remove(),400);},900);}
-      else{sp.classList.add("play");
-        setTimeout(()=>{sp.classList.add("out");setTimeout(()=>sp.remove(),650);},2400);}
+      // 表示はCSSが最初の描画から行う（JS不要）。JSは退場とタップスキップのみ担当
+      sp.classList.add("play");
+      const hideAfter=reduce?900:2400;
+      setTimeout(()=>{sp.classList.add("out");setTimeout(()=>sp.remove(),650);},hideAfter);
       sp.addEventListener("click",()=>{sp.classList.add("out");setTimeout(()=>sp.remove(),300);});
     }
   },
