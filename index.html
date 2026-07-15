@@ -1357,6 +1357,42 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
 .splash.quick .splash-title,.splash.quick .splash-sub,.splash.quick .splash-mark,.splash.quick .splash-route{opacity:1;animation:none}
 .splash.quick .splash-stamp{opacity:.72;transform:rotate(-14deg);animation:none}
 
+/* ===== v37 タッチ同等反応（携帯でPC版ホバーと同じ挙動に） ===== */
+@media (hover:none){
+  /* 行程表：絵文字が跳ねる */
+  .tl-card:active .tl-emoji{transform:scale(1.18) rotate(-8deg)}
+  /* テンプレ・年表・付箋日記：持ち上がり／滑り */
+  .tmpl-card:active{transform:rotate(0) translateY(-3px) scale(.985);border-color:var(--accent)}
+  .tlx-item:active .tlx-card{transform:translateX(4px) rotate(0);border-color:var(--accent)}
+  .day-diary:active{transform:rotate(0) translateY(-2px);box-shadow:0 5px 12px rgba(0,0,0,.12)}
+  /* 表紙イラスト・絵文字カバー */
+  .illust-opt:active{transform:rotate(-3deg) scale(1.08)}
+  .ec-chip:active{transform:rotate(0) scale(.9);border-color:var(--accent)}
+  /* チップ類 */
+  .fav-chip:active{transform:translateY(-2px) scale(1.05)}
+  /* 旅行中モード：経路ボタン */
+  .np-route:active{transform:scale(1.07)}
+  /* アーカイブ見出し */
+  details.arch>summary:active{transform:translateX(3px)}
+  /* ヘッダー・タブ・FAB */
+  .header-btn:active{transform:translateY(-1.5px) scale(.97)}
+  .tab:active{transform:translateY(-1px)}
+  .fab:active{animation:none;transform:rotate(0) scale(1.08)}
+  /* ブランドのコンパス回転 */
+  .brand:active .mark svg{transform:rotate(90deg)}
+  /* 制覇マップ：県とフォトマーカー */
+  .jpsvg path.gp:active{filter:brightness(1.12) drop-shadow(0 2px 6px rgba(0,0,0,.25))}
+  .photomark:active .pm-bg{fill:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+  /* 行程マップ：ピン */
+  .rmap-pin:active circle{r:13}
+  /* SNS・訪問ボタン（既存:activeを保険で明示） */
+  .sns-btn:active{transform:translateY(-2px) scale(.97);filter:brightness(1.06)}
+  .tl-visit:active{transform:scale(1.06) rotate(-2deg)}
+  /* カードのテープも指で押すと少し動く */
+  .grid .card:active::before{transform:rotate(-1deg) translateY(-1px)}
+  .grid .card:nth-child(even):active::before{transform:rotate(1deg) translateY(-1px)}
+}
+
 /* --- ホーム：カードの時間差入場（傾きへ着地） --- */
 .grid .card{animation:landIn .55s cubic-bezier(.22,.9,.32,1.2) backwards}
 .grid .card:nth-child(1){animation-delay:.04s}.grid .card:nth-child(2){animation-delay:.1s}
@@ -1475,7 +1511,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="author" content="旅のしおり運営者">
 <meta name="format-detection" content="telephone=no">
-<meta name="app-version" content="36">
+<meta name="app-version" content="37">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"旅のしおり","alternateName":"TABI NO SHIORI","url":"https://example.com/tabi-shiori.html","description":"行き先や日程をまとめ、写真で思い出をのこし、訪れた市区町村を日本地図で塗りつぶせる無料の旅のしおり作成Webアプリ。","inLanguage":"ja"}
 </script>
@@ -1657,7 +1693,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
 </script>
 <script>
 "use strict";
-const APP_VERSION="36";
+const APP_VERSION="37";
 /* =========================================================================
    旅のしおり v2
    保存: localStorage（しおり）+ IndexedDB（写真, 不可時はメモリ代替）
