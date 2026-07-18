@@ -774,6 +774,14 @@ details.arch>summary::-webkit-details-marker{display:none}
 details.arch>summary::before{content:"▸ ";color:var(--accent)}
 details.arch[open]>summary::before{content:"▾ "}
 details.arch .card{opacity:.88}
+/* 出発地レッグ（初日・帰路） */
+.origin-leg{background:color-mix(in srgb,var(--accent) 8%,var(--surface));border:1.5px dashed var(--accent);border-radius:5px 12px 6px 11px/11px 6px 12px 5px;padding:10px 14px;margin:2px 0 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;animation:landInL .7s ease backwards}
+.origin-leg.return{margin:12px 0 2px}
+.origin-leg .ol-ico{font-size:15px}
+.origin-leg b{color:var(--accent)}
+.origin-leg .ol-min{font-weight:800}
+.origin-leg .prec-mark{font-style:normal;font-size:11px;margin-left:2px}
+.origin-leg a{color:var(--accent);font-weight:700}
 .trash-link{margin-top:18px;display:flex;justify-content:flex-end}
 .trash-row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1.5px solid var(--border);border-radius:6px 13px 7px 12px/12px 7px 13px 6px;padding:12px 16px;margin-bottom:10px;animation:landInL .4s ease backwards}
 .trash-row .tlx-ill{width:52px;flex:none;color:var(--accent);opacity:.75}
@@ -1642,16 +1650,16 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 </style>
 <!-- ================= SEO / AEO =================
   ▼公開時に必ず編集：canonical と JSON-LD 内の url / 運営者名 を実際の公開URL・名義に書き換えてください -->
-<link rel="canonical" href="https://example.com/tabi-shiori.html">
+<link rel="canonical" href="https://travel-itinerary-tech.github.io/trip/">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="author" content="旅のしおり運営者">
 <meta name="format-detection" content="telephone=no">
-<meta name="app-version" content="43">
+<meta name="app-version" content="45">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","name":"旅のしおり","alternateName":"TABI NO SHIORI","url":"https://example.com/tabi-shiori.html","description":"行き先や日程をまとめ、写真で思い出をのこし、訪れた市区町村を日本地図で塗りつぶせる無料の旅のしおり作成Webアプリ。","inLanguage":"ja"}
+{"@context":"https://schema.org","@type":"WebSite","name":"旅のしおり","alternateName":"TABI NO SHIORI","url":"https://travel-itinerary-tech.github.io/trip/","description":"行き先や日程をまとめ、写真で思い出をのこし、訪れた市区町村を日本地図で塗りつぶせる無料の旅のしおり作成Webアプリ。","inLanguage":"ja"}
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"旅のしおり","applicationCategory":"TravelApplication","operatingSystem":"Web","url":"https://example.com/tabi-shiori.html","description":"旅行のしおり（旅程表）を無料で作成できるWebアプリ。おすすめプラン自動提案、移動時間の自動計算、Google/Appleマップ経路、訪問した都道府県・市区町村を塗りつぶす制覇マップ、実績バッジ、写真アルバム、QRコード共有、PDF印刷に対応。オフラインでも動作します。","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},"featureList":["旅のしおり作成","おすすめ旅行プラン自動提案","移動時間の自動計算（徒歩・車・電車・バス）","Googleマップ・Appleマップ経路表示","都道府県・市区町村の制覇マップ","実績バッジ・記念記録","写真アルバム","QRコード・リンク共有","カレンダー(.ics)書き出し","印刷・PDF出力"],"inLanguage":"ja"}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"旅のしおり","applicationCategory":"TravelApplication","operatingSystem":"Web","url":"https://travel-itinerary-tech.github.io/trip/","description":"旅行のしおり（旅程表）を無料で作成できるWebアプリ。おすすめプラン自動提案、移動時間の自動計算、Google/Appleマップ経路、訪問した都道府県・市区町村を塗りつぶす制覇マップ、実績バッジ、写真アルバム、QRコード共有、PDF印刷に対応。オフラインでも動作します。","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},"featureList":["旅のしおり作成","おすすめ旅行プラン自動提案","移動時間の自動計算（徒歩・車・電車・バス）","Googleマップ・Appleマップ経路表示","都道府県・市区町村の制覇マップ","実績バッジ・記念記録","写真アルバム","QRコード・リンク共有","カレンダー(.ics)書き出し","印刷・PDF出力"],"inLanguage":"ja"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
@@ -1828,7 +1836,7 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 </script>
 <script>
 "use strict";
-const APP_VERSION="43";
+const APP_VERSION="45";
 /* =========================================================================
    旅のしおり v2
    保存: localStorage（しおり）+ IndexedDB（写真, 不可時はメモリ代替）
@@ -2052,10 +2060,10 @@ const destKeys=()=>Object.keys(DESTINATIONS);
 function areaCountry(a){for(const k in DESTINATIONS){const d=DESTINATIONS[k];if(d.area===a||k===a)return d.country||"日本";}return "日本";}
 function isoToday(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function parseHM(t){const m=/(\d{1,2}):(\d{2})/.exec(t||"");return m?(+m[1])*60+(+m[2]):null;}
-function yahooTransitUrl(a,b,day){
-  let u="https://transit.yahoo.co.jp/search/result?from="+encodeURIComponent(a.name||"")+"&to="+encodeURIComponent(b.name||"")+"&type=1";
+function yahooTransitUrl(a,b,day,arrive){
+  let u="https://transit.yahoo.co.jp/search/result?from="+encodeURIComponent(a.name||"")+"&to="+encodeURIComponent(b.name||"")+"&type="+(arrive?4:1);
   if(day&&day.date){const[y,m,dd]=day.date.split("-");u+=`&y=${y}&m=${m}&d=${dd}`;
-    const hm=parseHM(a.time);if(hm!=null){const h=Math.floor(hm/60),mi=hm%60;u+=`&hh=${String(h).padStart(2,"0")}&m1=${Math.floor(mi/10)}&m2=${mi%10}`;}}
+    const hm=parseHM(arrive?b.time:a.time);if(hm!=null){const h=Math.floor(hm/60),mi=hm%60;u+=`&hh=${String(h).padStart(2,"0")}&m1=${Math.floor(mi/10)}&m2=${mi%10}`;}}
   return u;}
 const OVERSEAS_INFO={
 "台湾":{ll:[25.03,121.56],tz:-1,cur:"TWD",curName:"台湾ドル",rate:4.8,lang:"tw"},
@@ -2268,6 +2276,7 @@ function buildSuggested(inp,opt){
     id:uid(),title:base+suffix,dest:area+(inp.dest&&inp.dest!==area?` / ${inp.dest}`:""),theme,cover,country:areaCountry(area),pref:detectPref(area),
     start:inp.start||"",end:inp.start?addDaysIso(inp.start,totalDays-1):"",members:comp?`${comp.label}・${people}名`:people+"名",
     meet:(inp.origin?`${inp.origin} から `:"")+(inp.transport==="car"||inp.transport==="rentacar"?`${area}へ（${transportLabel(inp.transport)}）`:`${transportLabel(inp.transport)}で${area}へ`),
+    origin:(inp.origin||"").trim(),
     budget,notes,packing,days,reservations,sample:false,updatedAt:Date.now(),createdAt:Date.now(),
     planLabel:opt.label||"",planDesc:opt.desc||""
   });
@@ -2376,7 +2385,7 @@ function fileToDataUrl(file,maxDim=1400,quality=.82){
 }
 
 /* ---------- 雛形 ---------- */
-function blankTrip(){return{id:uid(),title:"",dest:"",start:"",end:"",members:"",meet:"",budget:"",notes:"",country:"日本",pref:"",fav:false,
+function blankTrip(){return{id:uid(),title:"",dest:"",start:"",end:"",members:"",meet:"",origin:"",budget:"",notes:"",country:"日本",pref:"",fav:false,
   theme:loadAppTheme(),cover:"mountains",packing:[],reservations:[],expenses:[],people:"",days:[blankDay()],createdAt:Date.now(),updatedAt:Date.now(),sample:false};}
 function blankDay(){return{id:uid(),date:"",label:"",note:"",wx:"",spots:[blankSpot()]};}
 /* ---------- 移動時間の見積り＆地図経路URL ---------- */
@@ -2384,6 +2393,7 @@ const DUR_DEFAULT={sight:60,food:60,cafe:40,stay:0,move:20,shop:45,nature:70,ons
 function defaultDur(cat){return DUR_DEFAULT[cat]!=null?DUR_DEFAULT[cat]:45;}
 function parseMin(t){const m=String(t||"").match(/^(\d{1,2})\s*[:：]\s*(\d{1,2})$/);if(!m)return null;return (+m[1])*60+(+m[2]);}
 function fmtMin(v){v=((v%1440)+1440)%1440;const h=Math.floor(v/60),m=v%60;return h+":"+String(m).padStart(2,"0");}
+function fmtDur(m){m=Math.round(m);if(m<60)return m+"分";const h=Math.floor(m/60),r=m%60;return h+"時間"+(r?r+"分":"");}
 // 移動手段
 const MODES=[{id:"walk",label:"徒歩",emoji:"🚶",gm:"walking",af:"w",sp:4.5,ov:0},{id:"car",label:"車",emoji:"🚗",gm:"driving",af:"d",sp:30,ov:0},{id:"train",label:"電車",emoji:"🚃",gm:"transit",af:"r",sp:52,ov:15},{id:"bus",label:"バス",emoji:"🚌",gm:"transit",af:"r",sp:20,ov:8}];
 const modeById=id=>MODES.find(m=>m.id===id)||MODES[1];
@@ -2889,6 +2899,8 @@ const App={
           <input value="${esc(t.title)}" placeholder="例：京都 定番さんぽ" oninput="App.editField('title',this.value)"></div>
         <div class="field"><label>行き先・サブタイトル</label>
           <input value="${esc(t.dest)}" placeholder="例：京都府 / 東山・伏見" oninput="App.editField('dest',this.value)"></div>
+        <div class="field"><label>出発地（任意・経路案内に使います）</label>
+          <input value="${esc(t.origin||"")}" placeholder="例：名古屋駅 / 東京駅 / 自宅の最寄り駅" oninput="App.editField('origin',this.value)"></div>
         <div class="row2">
           <div class="field"><label>出発日</label><input type="date" value="${esc(t.start)}" oninput="App.editField('start',this.value)"></div>
           <div class="field"><label>帰着日</label><input type="date" value="${esc(t.end)}" oninput="App.editField('end',this.value)"></div>
@@ -3252,10 +3264,33 @@ const App={
       const gUrl=buildRoute(d.spots,"google",t),aUrl=buildRoute(d.spots,"apple",t);
       const dayMaps=(gUrl||aUrl)?`<div class="day-maps">${gUrl?`<a class="mini-map g" href="${gUrl}" target="_blank" rel="noopener noreferrer">🗺 Googleで経路</a>`:""}${aUrl?`<a class="mini-map a" href="${aUrl}" target="_blank" rel="noopener noreferrer"> Appleで経路</a>`:""}</div>`:"";
       const diary=(d.note||d.wx)?`<div class="day-diary" onclick="App.editDayNote('${d.id}')">${d.wx?`<span class="dd-wx">${d.wx}</span>`:""}<span class="dd-note">${esc(d.note||"")}</span><span class="dd-edit">✎</span></div>`:`<button class="mini dd-add no-print" onclick="App.editDayNote('${d.id}')">📝 ひとこと日記</button>`;
+      let originTop="",originBack="";
+      const orgName=(t.origin||"").trim();
+      if(orgName){
+        const named=d.spots.filter(x=>x.name&&x.cat!=="move");
+        const mode=defaultMode(t);
+        const org={name:orgName,addr:orgName,cat:"sight",ll:t.originLL||undefined};
+        if(di===0&&named.length){
+          const first=named[0];
+          const min=(t.originPrec&&t.originMin)?t.originMin:estimateTravel(org,first,t.pref,mode);
+          originTop=`<div class="tl-leg origin-leg"><span class="ol-ico">🏠</span><b>${esc(orgName)}</b> から出発 → ${esc(first.name)}
+            ${min?`<span class="ol-min">約${fmtDur(min)}${t.originPrec?'<i class="prec-mark" title="実経路で計算">🌐</i>':""}</span>`:""}
+            <a href="${routeLegUrl(org,first,t,mode)}" target="_blank" rel="noopener noreferrer">経路</a>
+            ${mode==="train"&&t.country==="日本"?`<a class="yt-link" href="${yahooTransitUrl(org,first,d,true)}" target="_blank" rel="noopener noreferrer">Y!乗換</a>`:""}</div>`;
+        }
+        if(di===t.days.length-1&&named.length){
+          const last=named[named.length-1];
+          const min=(t.originPrec&&t.returnMin)?t.returnMin:estimateTravel(last,org,t.pref,mode);
+          originBack=`<div class="tl-leg origin-leg return">${esc(last.name)} → <span class="ol-ico">🏠</span><b>${esc(orgName)}</b>（帰路）
+            ${min?`<span class="ol-min">約${fmtDur(min)}${t.originPrec?'<i class="prec-mark" title="実経路で計算">🌐</i>':""}</span>`:""}
+            <a href="${routeLegUrl(last,org,t,mode)}" target="_blank" rel="noopener noreferrer">経路</a>
+            ${mode==="train"&&t.country==="日本"?`<a class="yt-link" href="${yahooTransitUrl(last,org,d,false)}" target="_blank" rel="noopener noreferrer">Y!乗換</a>`:""}</div>`;
+        }
+      }
       return `<div class="day-view"><div class="day-view-head"><div class="num">D${di+1}</div>
         <div class="info"><b>${esc(d.label||`${di+1}日目`)}</b><span>${d.date?fmtDate(d.date):"日付未定"}</span></div>${dayMaps}</div>
         ${diary}
-        <div class="timeline">${items||'<p style="color:var(--text-muted)">スポットが登録されていません。</p>'}</div></div>`;
+        <div class="timeline">${originTop}${items||'<p style="color:var(--text-muted)">スポットが登録されていません。</p>'}${originBack}</div></div>`;
     }).join("");
 
     const routeMap=this.renderRouteMap(t);
@@ -3541,6 +3576,7 @@ const App={
       ["市区町村が制覇マップに反映されません。","住所に「〜市／区／町／村」が含まれていると自動反映されます。スポット名だけの場合は住所欄に市区町村を追記してください。"],
       ["オフラインでも使えますか？","はい。一度開けば地図・アイコンも内蔵のためオフラインで動作します。地図リンク・予約サイトを開くときと、天気予報・現在地機能を使うときのみ通信が必要です。"],
       ["アニメーションを減らせますか？","端末の「視差効果を減らす／動きを減らす」をオンにすると、季節の演出を含む各種アニメが自動で抑制されます。"],
+      ["出発地を登録すると何ができますか？","しおりの編集画面（またはおすすめ提案）で<b>出発地</b>を登録すると、行程表の<b>初日の先頭に「🏠 出発地 → 最初のスポット」</b>、<b>最終日の末尾に「帰路」</b>の区間が自動で表示されます。所要時間の目安・地図の経路リンク・電車なら<b>Y!乗換案内</b>（行きは到着時刻あわせ・帰りは出発時刻あわせ）も付きます。精密経路計算がオンなら実際の道路経路で計算します。"],
       ["旅行当日はどんな表示になりますか？","旅行期間中にしおりを開くと<b>旅行中モード</b>になり、「いま」のスポットと「次」のスポット・残り時間・経路ボタンを先頭に表示し、行程表の現在地に「▶いまここ」の目印が付きます。スポットの「訪問する」を押すと<b>「いま」と進行バーが自動で次へ進み</b>、時刻より先に回った場合もチェックが優先されます（訪問済みスポットのアラートは鳴りません）。全部回り切ると紙吹雪でお祝い！ さらに<b>次のスポットの15分前</b>には、チャイム音とバイブ（対応端末）つきの画面内アラートでお知らせします（アプリを開いている間のみ・1分ごとに自動更新）。"],
       ["スマホのホーム画面にアプリとして追加できますか？","はい。<b>iPhone / iPad</b>はSafariで当サイトを開き、共有ボタン（□に↑）→<b>「ホーム画面に追加」</b>を選びます。<b>Android</b>はChromeのメニュー（︙）→<b>「ホーム画面に追加」（または「アプリをインストール」）</b>を選びます。追加したアイコンからアプリのように全画面で起動でき、一度開いた後は<b>オフラインでも起動</b>できます。"],
       ["海外旅行にも使えますか？","はい。おすすめ提案に台北・ソウル・香港・バンコク・シンガポール・グアム・ホノルル・パリ・ロンドンの9都市を収録し、海外のしおりでは現地時間と時差の表示、💱通貨換算メモ、🗣会話フレーズ集（5言語）が使えます。天気予報・精密経路計算も海外に対応しています。"],
@@ -3917,7 +3953,8 @@ const App={
     try{
       const r=await this._preciseCore(t,null);
       if(!r||this._ptCancel)return;
-      if(r.applied>0){
+      await this.preciseOriginLegs(t);
+      if(r.applied>0||t.originPrec){
         this.recomputeTrip(t);t.updatedAt=Date.now();
         if(this.trips.some(x=>x.id===t.id))this.save();
         if(!quiet)toast(`🌐 ${r.applied}区間を実際の経路で更新しました`);
@@ -3925,6 +3962,30 @@ const App={
         else if(this.view==="edit"&&this.editing&&this.editing.id===t.id)this.go("edit");
       }
     }finally{this._ptBusy=false;}
+  },
+  /* 出発地⇄最初/最後のスポットの実経路（精密計算オン時） */
+  async preciseOriginLegs(t){
+    const orgName=(t&&t.origin||"").trim();
+    if(!orgName){if(t){t.originPrec=false;t.originMin=0;t.returnMin=0;t.originLL=null;}return;}
+    try{
+      const named=[];(t.days||[]).forEach(d=>(d.spots||[]).forEach(x=>{if(x.name&&x.cat!=="move")named.push(x);}));
+      if(!named.length)return;
+      const hint=(t.pref||t.dest||"")+(t.country&&t.country!=="日本"?" "+t.country:"");
+      const org={name:orgName,addr:""};
+      if(t.originLL)org.ll=t.originLL;
+      else{const ok=await this._geocode(org,hint,t.country);if(!ok)return;t.originLL=org.ll;await new Promise(r=>setTimeout(r,this._ptWaitN||1100));}
+      const first=named[0],last=named[named.length-1];
+      const fl=spotLL(first)||first.ll,ll=spotLL(last)||last.ll;
+      if(!fl&&!ll)return;
+      const mode=defaultMode(t);const prof=mode==="walk"?"foot":"car";
+      let got=false;
+      if(fl){const r1=await this._osrmRoute(org.ll,fl,prof);
+        if(r1&&r1.duration){let m=r1.duration/60;if(mode==="train")m=Math.max(m*0.9,(r1.distance/1000)/60*60);t.originMin=Math.max(5,Math.round(m/5)*5);got=true;}
+        await new Promise(r=>setTimeout(r,this._ptWaitR||400));}
+      if(ll){const r2=await this._osrmRoute(ll,org.ll,prof);
+        if(r2&&r2.duration){let m=r2.duration/60;if(mode==="train")m=Math.max(m*0.9,(r2.distance/1000)/60*60);t.returnMin=Math.max(5,Math.round(m/5)*5);got=true;}}
+      if(got){t.originPrec=true;if(this.trips.some(x=>x.id===t.id))this.save();}
+    }catch(e){}
   },
   /* 手動実行（進捗モーダル付き） */
   async preciseTravel(){
@@ -4745,6 +4806,7 @@ const App={
     const base=JSON.parse(JSON.stringify(theirsNewer?theirs:mine));
     const other=theirsNewer?mine:theirs;
     base.id=mine.id;base.sid=mine.sid||theirs.sid;
+    ["origin"].forEach(k=>{if(!base[k]&&other[k])base[k]=other[k];});
     // 日：idで突合。ベースに無い日は追加
     base.days=base.days||[];const bDay={};base.days.forEach(d=>bDay[d.id]=d);
     (other.days||[]).forEach(od=>{
