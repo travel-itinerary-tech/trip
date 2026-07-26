@@ -990,7 +990,7 @@ body,.card,.btn,.panel,.info-box,.tl-card,.map-wrap,.rally-hero,.booklet,.modal,
 .qa-a b{color:var(--text)}
 /* ============ Web公開向けUI ============ */
 /* スプラッシュ（初回起動演出） */
-.splash{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;background:var(--header-bg);color:var(--header-text);opacity:1;pointer-events:auto;transition:opacity .5s ease;animation:splashSafeHide .7s ease 9s forwards}
+.splash{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;background:var(--header-bg);color:var(--header-text);opacity:1;pointer-events:auto;transition:opacity .5s ease;animation:splashSafeHide .7s ease 11s forwards}
 @keyframes splashSafeHide{to{opacity:0;visibility:hidden}}
 .splash.play{opacity:1;pointer-events:auto}
 .splash.out{opacity:0;pointer-events:none}
@@ -1370,10 +1370,18 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
 @keyframes stampPress{0%{opacity:0;transform:rotate(-24deg) scale(1.8)}60%{opacity:.85;transform:rotate(-10deg) scale(.94)}100%{opacity:.72;transform:rotate(-14deg) scale(1)}}
 .splash-inner{position:relative}
 @media (max-width:560px){.splash-stamp{right:-16px;top:-26px;width:62px;height:62px;font-size:8.5px}}
+@media (max-width:380px){.splash-stamp{right:-4px;top:-34px;width:54px;height:54px;font-size:7.5px}}
 /* reduced-motion：動きなしで一呼吸だけロゴを見せる */
 .splash.quick .splash-title i{opacity:1;transform:none;animation:none}
 .splash.quick .splash-title,.splash.quick .splash-sub,.splash.quick .splash-mark,.splash.quick .splash-route{opacity:1;animation:none}
 .splash.quick .splash-stamp{opacity:.72;transform:rotate(-14deg);animation:none}
+/* v47：読み込み中（hold）＝静止した完成ロゴ。描画完了後にJSがholdを外してフル再生する */
+.splash.hold .splash-title i{opacity:1;transform:none;animation:none}
+.splash.hold .splash-title,.splash.hold .splash-sub,.splash.hold .splash-mark,.splash.hold .splash-route{opacity:1;animation:none}
+.splash.hold .sp-star{stroke-dashoffset:0;animation:none}
+.splash.hold .sp-route{animation:none}
+.splash.hold .sp-plane-g{animation:none}
+.splash.hold .splash-stamp{opacity:.5;transform:rotate(-14deg) scale(1);animation:none}
 @media (prefers-reduced-motion:reduce){
   .splash{animation:splashSafeHide .4s ease 1.2s forwards}
   .splash .splash-title,.splash .splash-sub,.splash .splash-mark,.splash .splash-route{opacity:1;animation:none}
@@ -1541,17 +1549,20 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
 .vhero h2{font-family:var(--font-display);font-size:23px;margin:4px 0 6px;position:relative;z-index:1}
 .vhero p{font-family:var(--font-hand);font-size:13.5px;opacity:.92;margin:0;position:relative;z-index:1;max-width:70%}
 .vhero .hh-kicker{position:relative;z-index:1}
-.vh-decor{position:absolute;right:6px;top:0;bottom:0;width:210px;display:flex;align-items:center;opacity:.9;pointer-events:none}
+.vhero::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(90deg,var(--header-bg) 0,var(--header-bg) 36%,transparent 74%)}
+.vh-decor{position:absolute;right:6px;top:0;bottom:0;width:210px;display:flex;align-items:center;opacity:.9;pointer-events:none;z-index:0}
 .vh-decor svg{width:100%;height:86%}
 .vh-actions{margin:-6px 0 16px;display:flex;justify-content:flex-end}
 .rally-hero{position:relative;overflow:hidden}
-.rally-hero .rally-decor{color:var(--accent);opacity:.5;width:230px}
+.rally-hero .rally-decor{color:var(--accent);opacity:.16;width:200px;right:-8px}
 .rally-hero h2,.rally-hero .sub,.rally-hero .geo-stats,.rally-hero .map-toggle{position:relative;z-index:1}
 @media (max-width:560px){
   .vhero{padding:20px 18px;min-height:104px}
   .vhero p{max-width:100%}
-  .vh-decor{width:150px;opacity:.4}
-  .rally-hero .rally-decor{width:160px;opacity:.3}
+  .vh-decor{width:150px;opacity:.35}
+  .rally-hero .rally-decor{width:140px;opacity:.1}
+  .vhero::after{background:linear-gradient(90deg,var(--header-bg) 0,var(--header-bg) 30%,color-mix(in srgb,var(--header-bg) 55%,transparent) 68%,transparent 100%)}
 }
 
 /* --- ヒーロー装飾：自然なゆっくりした時間で --- */
@@ -1654,7 +1665,7 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="author" content="旅のしおり運営者">
 <meta name="format-detection" content="telephone=no">
-<meta name="app-version" content="45">
+<meta name="app-version" content="48">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"旅のしおり","alternateName":"TABI NO SHIORI","url":"https://travel-itinerary-tech.github.io/trip/","description":"行き先や日程をまとめ、写真で思い出をのこし、訪れた市区町村を日本地図で塗りつぶせる無料の旅のしおり作成Webアプリ。","inLanguage":"ja"}
 </script>
@@ -1746,6 +1757,7 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
     <div class="splash-stamp" aria-hidden="true">TRAVEL<span>✈</span>NOTE</div>
   </div>
 </div>
+<script>try{document.getElementById("splash").classList.add("hold");}catch(e){}</script>
 <div id="modal-root"></div>
 <div id="lightbox-root"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -1836,7 +1848,7 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 </script>
 <script>
 "use strict";
-const APP_VERSION="45";
+const APP_VERSION="48";
 /* =========================================================================
    旅のしおり v2
    保存: localStorage（しおり）+ IndexedDB（写真, 不可時はメモリ代替）
@@ -3542,13 +3554,26 @@ const App={
     if(sp){
       // 表示はCSSが最初の描画から行う（JS不要）。JSが動いたらアニメーションを頭から再生し直し、
       // 携帯の読み込み中に裏で進んでしまう問題を防ぐ（display切替でCSSアニメがリスタートする）
+      // 上映の正式スタートは「実際に画面が描画された後」に固定：
+      // 携帯ではフォント読込等で描画がJS実行より遅れるため、JS実行時点を起点にすると
+      // ユーザーが見る前にアニメーションとタイマーが進んでしまう。
+      // → loadイベント後、描画フレームを2回確認してからリスタート＆タイマー開始。
       sp.classList.add("play");
-      if(!reduce){
-        const inner=sp.querySelector(".splash-inner");
-        if(inner){inner.style.display="none";void inner.offsetWidth;inner.style.display="";}
-      }
-      const hideAfter=reduce?1200:4200;
-      setTimeout(()=>{sp.classList.add("out");setTimeout(()=>sp.remove(),650);},hideAfter);
+      const startShow=()=>{
+        if(sp._started||!sp.parentNode)return;sp._started=true;
+        sp.classList.remove("hold");
+        if(!reduce){
+          const inner=sp.querySelector(".splash-inner");
+          if(inner){inner.style.display="none";void inner.offsetWidth;inner.style.display="";}
+        }
+        const hideAfter=reduce?1200:4200;
+        setTimeout(()=>{sp.classList.add("out");setTimeout(()=>sp.remove(),650);},hideAfter);
+      };
+      const kick=()=>{try{requestAnimationFrame(()=>requestAnimationFrame(startShow));}catch(e){startShow();}};
+      if(document.readyState==="complete")kick();
+      else window.addEventListener("load",kick,{once:true});
+      // 保険：loadが遅延・不発でも3秒後には必ず開始（無限待ちを防ぐ）
+      setTimeout(startShow,3000);
       sp.addEventListener("click",()=>{sp.classList.add("out");setTimeout(()=>sp.remove(),300);});
     }
   },
