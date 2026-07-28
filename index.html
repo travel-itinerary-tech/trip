@@ -1710,6 +1710,17 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 .print-wm{display:none}
 @media print{.print-wm{display:block;text-align:center;font-size:10.5px;color:#888;margin-top:14px}}
 @media (max-width:520px){.pro-feats{grid-template-columns:1fr}}
+/* ---------- スプラッシュのモバイル最適化（カクつき対策） ---------- */
+/* アニメする要素をGPU合成レイヤーに載せ、描画コストを下げる */
+.splash-inner,.splash-title i,.splash-mark svg,.splash-route svg,.splash .sp-plane,.splash-stamp{will-change:transform,opacity;backface-visibility:hidden}
+.splash::before{transform:translateZ(0)}
+/* モバイルでは常時動き続ける装飾アニメ（オーロラ背景・点線マーチ・機体の浮遊）を止め、
+   登場アニメ本編にフレームを集中させる。見た目の骨格は維持される */
+@media (max-width:640px){
+  .splash::before{animation:none}
+  .splash .sp-route{animation:viewIn .5s ease .55s both}
+  .splash .sp-plane{animation:none}
+}
 </style>
 </head>
 <body>
@@ -1871,7 +1882,7 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 </script>
 <script>
 "use strict";
-const APP_VERSION="50";
+const APP_VERSION="52";
 /* =========================================================================
    旅のしおり v2
    保存: localStorage（しおり）+ IndexedDB（写真, 不可時はメモリ代替）
@@ -2679,6 +2690,8 @@ const App={
   trips:[],currentId:null,view:"home",editing:null,_isNew:false,_lightPhotos:[],_lightIdx:0,
 
   init(){
+    // スプラッシュ表示中は重い後処理（季節演出・写真バッジ読込）を遅延させ、アニメのカクつきを防ぐ
+    this._splashActive=!!document.getElementById("splash");
     document.documentElement.setAttribute("data-theme",loadAppTheme());
     // Pro版ライセンスの検証（非同期・完了後に表示を更新）
     PRO.init().then(ok=>{if(ok&&(this.view==="home"||this.view==="themes"||this.view==="pro"))this.go(this.view);});
@@ -2691,7 +2704,7 @@ const App={
     this.go("home");
     this.initTouchDrag();
     this.initRipple();
-    this.renderSeasonFx();
+    if(!this._splashActive)this.renderSeasonFx();
     this.initSiteChrome();
     document.documentElement.setAttribute("data-fs",this.fsMode());
     this.purgeExpiredTrash();
@@ -2777,7 +2790,7 @@ const App={
     if(view==="view"&&this._nowMode){
       this._checkNowAlert(this.current());
       this._nowTimer=setInterval(()=>{if(this.view!=="view")return;this._checkNowAlert(this.current());this.go("view");},60000);}
-    if(view==="home")this.fillPhotoBadges();
+    if(view==="home"&&!this._splashActive)this.fillPhotoBadges();
     if(view==="rally")this.fillPhotoMap();
     // 画面が変わったときだけトップへ＋登場アニメ。同一画面の更新（チェック操作など）は位置を保持
     if(sameView){window.scrollTo({top:keepY,behavior:"instant"});this.animateView(false);}
@@ -3769,24 +3782,50 @@ const App={
       // 上映の正式スタートは「実際に画面が描画された後」に固定：
       // 携帯ではフォント読込等で描画がJS実行より遅れるため、JS実行時点を起点にすると
       // ユーザーが見る前にアニメーションとタイマーが進んでしまう。
-      // → loadイベント後、描画フレームを2回確認してからリスタート＆タイマー開始。
+      // → load後にWebフォントの読込完了（上限2.2秒）を待ち、描画フレームを2回確認してから
+      //    リスタート＆タイマー開始。フォントが後から届いて文字が差し替わり、
+      //    アニメ中にカクつく・レイアウトが跳ねる問題を防ぐ。
       sp.classList.add("play");
+      // スプラッシュ終了時に、遅延させていた処理（季節演出・写真バッジ）を一度だけ実行
+      const finish=()=>{
+        if(this._splashFinished)return;this._splashFinished=true;this._splashActive=false;
+        try{this.renderSeasonFx();}catch(e){}
+        try{if(this.view==="home")this.fillPhotoBadges();}catch(e){}
+      };
+      const hide=()=>{
+        if(sp._hidden)return;sp._hidden=true;
+        sp.classList.add("out");setTimeout(()=>{try{sp.remove();}catch(e){}},650);
+        finish();
+      };
       const startShow=()=>{
         if(sp._started||!sp.parentNode)return;sp._started=true;
+        // CSSの保険タイマー(splashSafeHide: 表示開始から11秒で強制フェード)を解除する。
+        // 携帯は読み込みが遅くアニメ開始が後ろへずれるため、解除しないと
+        // 11秒ヒューズがアニメの途中で発火し「最後まで表示されない・短い」原因になる。
+        // ここから先の非表示はJSのタイマーが正確に管理する（JS不動作時のみCSS保険が働く）。
+        sp.style.animation="none";
+        sp.style.opacity="";sp.style.visibility="";
         sp.classList.remove("hold");
         if(!reduce){
           const inner=sp.querySelector(".splash-inner");
           if(inner){inner.style.display="none";void inner.offsetWidth;inner.style.display="";}
         }
-        const hideAfter=reduce?1200:4200;
-        setTimeout(()=>{sp.classList.add("out");setTimeout(()=>sp.remove(),650);},hideAfter);
+        setTimeout(hide,reduce?1200:4200);
       };
-      const kick=()=>{try{requestAnimationFrame(()=>requestAnimationFrame(startShow));}catch(e){startShow();}};
+      const kick=()=>{
+        const cap=new Promise(r=>setTimeout(r,2200));
+        const fonts=(document.fonts&&document.fonts.ready)?Promise.race([document.fonts.ready,cap]):Promise.resolve();
+        fonts.then(()=>{try{requestAnimationFrame(()=>requestAnimationFrame(startShow));}catch(e){startShow();}});
+      };
       if(document.readyState==="complete")kick();
       else window.addEventListener("load",kick,{once:true});
-      // 保険：loadが遅延・不発でも3秒後には必ず開始（無限待ちを防ぐ）
-      setTimeout(startShow,3000);
-      sp.addEventListener("click",()=>{sp.classList.add("out");setTimeout(()=>sp.remove(),300);});
+      // 保険：loadやフォントが遅延・不発でも3.6秒後には必ず開始（無限待ちを防ぐ）
+      setTimeout(startShow,3600);
+      // 保険：CSSのsplashSafeHide（11秒）で消えた場合でも遅延処理は必ず実行
+      setTimeout(finish,11500);
+      sp.addEventListener("click",hide);
+    }else{
+      this._splashActive=false;
     }
   },
   renderHelp(){
