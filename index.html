@@ -1714,12 +1714,33 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 /* アニメする要素をGPU合成レイヤーに載せ、描画コストを下げる */
 .splash-inner,.splash-title i,.splash-mark svg,.splash-route svg,.splash .sp-plane,.splash-stamp{will-change:transform,opacity;backface-visibility:hidden}
 .splash::before{transform:translateZ(0)}
-/* モバイルでは常時動き続ける装飾アニメ（オーロラ背景・点線マーチ・機体の浮遊）を止め、
-   登場アニメ本編にフレームを集中させる。見た目の骨格は維持される */
-@media (max-width:640px){
-  .splash::before{animation:none}
-  .splash .sp-route{animation:viewIn .5s ease .55s both}
-  .splash .sp-plane{animation:none}
+/* ---------- オープニング演出はOSの「動きを減らす」設定でも再生する ----------
+   （運営方針: 演出は約4秒と短く、画面タップでいつでもスキップ可能なため。
+     携帯でもPCと同一の動きにする。アプリ本体のアニメ抑制は従来どおり尊重） */
+@media (prefers-reduced-motion:reduce){
+  .splash{animation:splashSafeHide .7s ease 11s forwards!important}
+  .splash::before{animation:aurora 8s ease-in-out infinite alternate!important}
+  .splash .splash-title{opacity:0;animation:viewIn .6s ease .5s forwards!important}
+  .splash .splash-sub{opacity:0;animation:viewIn .6s ease 1.15s forwards!important}
+  .splash .splash-route{opacity:0;animation:viewIn .5s ease 1.3s forwards!important}
+  .splash .splash-title i{opacity:0;transform:translateY(18px) scale(.8);animation:letterIn .55s cubic-bezier(.34,1.56,.64,1) forwards!important}
+  .splash .splash-title i:nth-child(1){animation-delay:.45s!important}
+  .splash .splash-title i:nth-child(2){animation-delay:.57s!important}
+  .splash .splash-title i:nth-child(3){animation-delay:.69s!important}
+  .splash .splash-title i:nth-child(4){animation-delay:.81s!important}
+  .splash .splash-title i:nth-child(5){animation-delay:.93s!important}
+  .splash .sp-star{stroke-dasharray:120;stroke-dashoffset:120;animation:spDraw 1s ease .1s forwards!important}
+  .splash .sp-route{animation:routeMarch 1.6s linear .55s infinite,viewIn .5s ease .55s both!important}
+  .splash .sp-plane{animation:floatY 1.6s ease-in-out infinite!important}
+  .splash .sp-plane-g{animation:planeFly 1.5s cubic-bezier(.5,.05,.35,1) .6s both!important}
+  .splash .splash-stamp{opacity:0;transform:none;animation:stampPress .5s cubic-bezier(.2,2.4,.4,.8) 1.55s both!important}
+  .splash{transition:opacity .5s ease!important}
+  .splash.out .splash-inner{transition:.55s ease!important}
+  /* hold（読み込み中の静止表示）中はアニメを走らせない（従来どおり） */
+  .splash.hold .splash-title,.splash.hold .splash-sub,.splash.hold .splash-route,.splash.hold .splash-title i{opacity:1!important;transform:none!important;animation:none!important}
+  .splash.hold .sp-star{stroke-dashoffset:0!important;animation:none!important}
+  .splash.hold .sp-route,.splash.hold .sp-plane-g,.splash.hold .splash-stamp{animation:none!important}
+  .splash.hold .splash-stamp{opacity:.72!important;transform:rotate(-14deg)!important}
 }
 </style>
 </head>
@@ -1882,7 +1903,7 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 </script>
 <script>
 "use strict";
-const APP_VERSION="52";
+const APP_VERSION="53";
 /* =========================================================================
    旅のしおり v2
    保存: localStorage（しおり）+ IndexedDB（写真, 不可時はメモリ代替）
@@ -3773,9 +3794,11 @@ const App={
       if(bar)bar.style.transform=`scaleX(${p})`;
       if(bt)bt.classList.toggle("show",(window.scrollY||0)>420);};
     window.addEventListener("scroll",onScroll,{passive:true});onScroll();
-    // スプラッシュ（毎回の起動時に再生。reduced-motion時は動きなしの短縮表示）
+    // スプラッシュ（毎回の起動時に再生）
+    // 運営方針: オープニング演出は「動きを減らす」設定の端末でも再生する
+    // （約4秒と短く、タップでスキップ可能。アプリ本体のアニメ抑制は従来どおり尊重）
     const sp=document.getElementById("splash");
-    const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce=false;
     if(sp){
       // 表示はCSSが最初の描画から行う（JS不要）。JSが動いたらアニメーションを頭から再生し直し、
       // 携帯の読み込み中に裏で進んでしまう問題を防ぐ（display切替でCSSアニメがリスタートする）
