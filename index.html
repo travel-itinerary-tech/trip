@@ -1690,26 +1690,9 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 {"@type":"HowToStep","position":4,"name":"旅行中の記録","text":"訪れたスポットで「訪問する」を押すと、制覇マップに都道府県・市区町村のスタンプが貯まり、写真もアルバムに残せます。"}]}
 </script>
 <style id="monetize-css">
-/* ---------- マネタイズUI（宿検索CTA / Pro版） ---------- */
+/* ---------- マネタイズUI（宿検索CTA） ---------- */
 .cta-panel{margin:18px 0 6px;padding:14px 16px;border:1px dashed var(--border-strong);border-radius:var(--radius-sm,10px);background:var(--surface)}
 .cta-sub{font-size:12.5px;color:var(--text-muted);margin:4px 0 10px}
-.tc-pro{font-size:11px;font-weight:800;color:var(--accent);border:1px solid var(--accent);border-radius:20px;padding:2px 8px;white-space:nowrap}
-.theme-card.tc-locked .tc-preview{opacity:.55;filter:saturate(.55)}
-.pro-banner{display:block;width:100%;text-align:left;margin:0 0 18px;padding:12px 16px;border:1.5px solid var(--accent);border-radius:var(--radius-sm,10px);background:var(--surface);color:var(--text);font-size:13.5px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
-.pro-banner:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
-.pro-banner.is-pro{border-style:solid;cursor:default;color:var(--text-muted)}
-.pro-status{margin:6px 0 4px;padding:10px 14px;border-radius:var(--radius-sm,10px);border:1px solid var(--border);background:var(--surface);font-size:13.5px}
-.pro-status.ok{border-color:var(--accent)}
-.pro-table{width:100%;border-collapse:collapse;font-size:13.5px}
-.pro-table th,.pro-table td{padding:9px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
-.pro-table thead th{font-size:12px;color:var(--text-muted);border-bottom:1.5px solid var(--border-strong)}
-.pro-table .pro-col{color:var(--accent);font-weight:700}
-.pro-steps{margin:4px 0 4px 20px;font-size:13.5px;line-height:1.9}
-.pro-feats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px;font-size:13px}
-.pro-feats div{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface)}
-.print-wm{display:none}
-@media print{.print-wm{display:block;text-align:center;font-size:10.5px;color:#888;margin-top:14px}}
-@media (max-width:520px){.pro-feats{grid-template-columns:1fr}}
 /* ---------- スプラッシュのモバイル最適化（カクつき対策） ---------- */
 /* アニメする要素をGPU合成レイヤーに載せ、描画コストを下げる */
 .splash-inner,.splash-title i,.splash-mark svg,.splash-route svg,.splash .sp-plane,.splash-stamp{will-change:transform,opacity;backface-visibility:hidden}
@@ -1783,7 +1766,6 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
     <div class="sf-brand"><b>旅のしおり</b><span>つくる・のこす・あつめる。旅のとなりに、いつもこの一冊。</span></div>
     <nav class="sf-nav" aria-label="サイト情報">
       <a onclick="App.go('help')">使い方・Q&A</a>
-      <a onclick="App.go('pro')">✨ Pro版について</a>
       <a onclick="App.go('about')">運営者情報・お問い合わせ</a>
       <a onclick="App.go('privacy')">プライバシーポリシー</a>
       <a onclick="App.go('terms')">利用規約・免責事項</a>
@@ -1903,7 +1885,7 @@ p,.section-sub,.qa-a,.legal p,.np-hint,.opt-hint,.tl-memo,.hh-text p,.vhero p,.e
 </script>
 <script>
 "use strict";
-const APP_VERSION="54";
+const APP_VERSION="55";
 /* =========================================================================
    旅のしおり v2
    保存: localStorage（しおり）+ IndexedDB（写真, 不可時はメモリ代替）
@@ -1978,7 +1960,6 @@ const illustSvg = id => {
       変換されます。導入が最も簡単なのでまずこれを推奨。
    ② AFF: サービス別のアフィリエイトURL（ASP発行のものをそのまま）
       {KEYWORD} は目的地名に自動置換されます。空欄なら通常リンク。
-   ③ PRO_BUY_URL: BOOTH / Gumroad 等のPro版販売ページURL。
    ※ ①か②を1つでも設定すると、景品表示法（ステマ規制）対応の
       「PR」表記が予約リンク・検索ボタンに自動で付きます。
    ================================================================ */
@@ -1993,10 +1974,6 @@ const MONETIZE={
     kkday:"",
     asoview:"",
   },
-  PRO_PRICE:"980",           // Pro版の価格（円・買い切り）
-  PRO_BUY_URL:"",            // 販売ページURL（BOOTH/Gumroad）。空欄なら「準備中」表示
-  /* Pro版ライセンス検証用の公開鍵（license-tool.html とペア。変更不要） */
-  PUBKEY:{kty:"EC",crv:"P-256",x:"9R7aHZtoUXw1dewltAK75sS3N_dzuFWLTeBb02N5VcE",y:"n4CZCNPHaLX4Q0lqNA0J7AVrADewstPKadaDIFxzGrw"},
 };
 /* 目的地検索リンクの既定形（アフィリ未設定時は通常リンクとして動作） */
 const SEARCH_URLS={
@@ -2020,41 +1997,14 @@ function affLink(key,keyword){
 const AD_DISCLOSURE=affActive();
 
 /* ================================================================
-   Pro版（フリーミアム）ライセンス
-   キー形式: TABIPRO-<base64url(情報)>.<base64url(ECDSA署名)>
-   発行は同梱の license-tool.html（秘密鍵入り・非公開）で行う。
-   検証はオフライン（WebCrypto）。サーバー・アカウント不要。
+   Pro版（有料プラン）は 2026-07 に廃止し、全機能を無料開放しました。
+   互換のため PRO オブジェクトは残していますが、常に全機能解放
+   （active:true・上限なし）として動作します。将来再導入する場合は
+   active を false に戻し、LIMITS に上限を設定してください。
    ================================================================ */
 const PRO={
-  LIMITS:{trips:Infinity,photos:20,themes:["wa","kraft","mono-white","paper","map"]}, /* trips:Infinity=作成数制限なし(方針: 2026-07) */
-  active:false,info:null,
-  _b64u(s){let b=String(s).replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";return atob(b);},
-  async verify(key){
-    try{
-      const m=/^TABIPRO-([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(String(key||"").trim());
-      if(!m||!(window.crypto&&crypto.subtle))return null;
-      const payload=Uint8Array.from(this._b64u(m[1]),c=>c.charCodeAt(0));
-      const sig=Uint8Array.from(this._b64u(m[2]),c=>c.charCodeAt(0));
-      const pk=await crypto.subtle.importKey("jwk",MONETIZE.PUBKEY,{name:"ECDSA",namedCurve:"P-256"},false,["verify"]);
-      const ok=await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},pk,sig,payload);
-      if(!ok)return null;
-      return JSON.parse(new TextDecoder().decode(payload));
-    }catch(e){return null;}
-  },
-  async init(){
-    try{const k=localStorage.getItem("tabi_pro_key");if(!k)return false;
-      const info=await this.verify(k);
-      if(info){this.active=true;this.info=info;return true;}
-    }catch(e){}
-    return false;
-  },
-  async activate(key){
-    const info=await this.verify(key);
-    if(!info)return false;
-    try{localStorage.setItem("tabi_pro_key",String(key).trim());}catch(e){}
-    this.active=true;this.info=info;return true;
-  },
-  deactivate(){try{localStorage.removeItem("tabi_pro_key");}catch(e){}this.active=false;this.info=null;},
+  LIMITS:{trips:Infinity,photos:Infinity,themes:null},
+  active:true,info:null,
 };
 
 /* ---------- 予約サイトのリンク（2025-2026時点の主要サービス） ---------- */
@@ -2714,8 +2664,8 @@ const App={
     // スプラッシュ表示中は重い後処理（季節演出・写真バッジ読込）を遅延させ、アニメのカクつきを防ぐ
     this._splashActive=!!document.getElementById("splash");
     document.documentElement.setAttribute("data-theme",loadAppTheme());
-    // Pro版ライセンスの検証（非同期・完了後に表示を更新）
-    PRO.init().then(ok=>{if(ok&&(this.view==="home"||this.view==="themes"||this.view==="pro"))this.go(this.view);});
+    // 旧Pro版ライセンス情報が残っていれば掃除（有料プランは廃止済み）
+    try{localStorage.removeItem("tabi_pro_key");}catch(e){}
     // バリューコマース LinkSwitch（設定時のみ読み込み）
     if(MONETIZE.VC_PID){try{window.vc_pid=MONETIZE.VC_PID;const s=document.createElement("script");s.src="https://aml.valuecommerce.com/vcdal.js";s.async=true;document.head.appendChild(s);}catch(e){}}
     this.trips=loadTrips();
@@ -2736,28 +2686,11 @@ const App={
   save(){saveTrips(this.trips);},
   current(){return this.trips.find(t=>t.id===this.currentId)||null;},
 
-  /* ---------- Pro版（フリーミアム）ゲート ---------- */
+  /* Pro版は廃止。すべての機能が無料で使えます（互換のため関数は残置） */
   tripCount(){return this.trips.filter(t=>!t.sample).length;},
-  canAddTrip(){return PRO.active||this.tripCount()<PRO.LIMITS.trips;},
-  guardNewTrip(){
-    if(this.canAddTrip())return true;
-    this.proModal(`無料版で作成できるしおりは <b>${PRO.LIMITS.trips}件</b> までです（作成済み：${this.tripCount()}件）。Pro版なら無制限に作成できます。`);
-    return false;
-  },
-  themeLocked(id){return !PRO.active&&!PRO.LIMITS.themes.includes(id);},
-  proModal(msg){
-    this.modal("✨ Pro版のご案内",
-      `<p style="margin-bottom:12px">${msg}</p>
-       <div class="pro-feats">
-         <div>🎨 全${THEMES.length}テーマ解放</div>
-         <div>📷 写真アルバム <b>無制限</b></div>
-         <div>🖼 画像・印刷の透かしなし</div>
-         <div>🚀 今後の新機能を優先解放</div>
-       </div>
-       <p style="font-size:13px;color:var(--text-muted)">買い切り <b>¥${esc(MONETIZE.PRO_PRICE)}</b>（月額なし）。一度の購入でこのブラウザでずっと使えます。</p>`,
-      [{label:"閉じる",ghost:true,fn:()=>this.closeModal()},
-       {label:"Pro版をくわしく",fn:()=>{this.closeModal();this.go("pro");}}]);
-  },
+  canAddTrip(){return true;},
+  guardNewTrip(){return true;},
+  themeLocked(){return false;},
   /* ---------- 宿・体験の検索CTA（アフィリ対応） ---------- */
   hotelCta(t,compact){
     let kw=(t&&(t.dest||t.title))||"";
@@ -2805,7 +2738,7 @@ const App={
     else if(view==="terms")m.innerHTML=this.renderTerms();
     else if(view==="about")m.innerHTML=this.renderAbout();
     else if(view==="themes")m.innerHTML=this.renderThemes();
-    else if(view==="pro")m.innerHTML=this.renderPro();
+    else if(view==="pro"){m.innerHTML=this.renderHelp();this.view="help";}
     this.updateFab();
     clearInterval(this._nowTimer);
     if(view==="view"&&this._nowMode){
@@ -3523,7 +3456,7 @@ const App={
         ${packing}
         ${expenses}
       </div></div>
-      ${PRO.active?"":'<div class="print-wm">このしおりは「旅のしおり」（無料版）で作成されました</div>'}
+
       <div class="btn-row trip-actions" style="margin-top:18px">
         <button class="btn" onclick="App.go('rally')">🗺 制覇マップ</button>
         ${buildRoute(t.days.flatMap(d=>d.spots),"google",t)?`<a class="btn ghost" href="${buildRoute(t.days.flatMap(d=>d.spots),"google",t)}" target="_blank" rel="noopener noreferrer">🗺 全行程をGoogleで</a>`:""}
@@ -3637,57 +3570,6 @@ const App={
       (t.days||[]).forEach((d)=>(d.spots||[]).forEach(s=>{if(s.fav)out.push({s,t,day:d,pref:detectPrefSmart(s.addr,tp),city:detectCity(s.addr||"")});}));}
     return out;
   },
-  /* ---------- Pro版ページ ---------- */
-  renderPro(){
-    const rows=[
-      ["しおり作成数","無制限","無制限"],
-      ["デザインテーマ",`定番${PRO.LIMITS.themes.length}種`,`全${THEMES.length}種`],
-      ["写真アルバム",`1しおり${PRO.LIMITS.photos}枚`,"無制限"],
-      ["ダイジェスト画像・シェアカード","「Free版で作成」表記あり","透かしなし"],
-      ["印刷 / PDF","フッターに無料版表記","表記なし"],
-      ["今後の新機能","—","優先解放"],
-    ].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="pro-col">${r[2]}</td></tr>`).join("");
-    const buyBtn=MONETIZE.PRO_BUY_URL
-      ?`<a class="btn wide" href="${esc(MONETIZE.PRO_BUY_URL)}" target="_blank" rel="noopener noreferrer">🛒 Pro版を購入する（¥${esc(MONETIZE.PRO_PRICE)}・買い切り）</a>`
-      :`<button class="btn wide" disabled style="opacity:.55;cursor:not-allowed">🛒 販売準備中（もうしばらくお待ちください）</button>`;
-    const status=PRO.active
-      ?`<div class="pro-status ok">✅ <b>Pro版 認証済み</b>${PRO.info&&PRO.info.n?`　<span style="opacity:.8">（${esc(PRO.info.n)} 様）</span>`:""}
-         <button class="mini" style="margin-left:10px" onclick="App.confirmDeactivateLicense()">認証を解除</button></div>`
-      :`<div class="pro-status">現在は<b>無料版</b>をご利用中です</div>`;
-    return `<button class="back-link" onclick="App.go('home')">← 一覧へ</button>
-      <h2 class="section-title">✨ 旅のしおり Pro</h2>
-      <p class="section-sub">無料版のまま十分お使いいただけます。もっと使い込む方へ、買い切り¥${esc(MONETIZE.PRO_PRICE)}（月額なし）ですべての機能を解放します。</p>
-      ${status}
-      <div class="panel" style="margin:16px 0"><div class="panel-head"><h3>無料版とPro版のちがい</h3></div>
-        <table class="pro-table"><thead><tr><th>機能</th><th>無料</th><th class="pro-col">Pro</th></tr></thead><tbody>${rows}</tbody></table>
-      </div>
-      ${PRO.active?"":`<div class="panel" style="margin:16px 0"><div class="panel-head"><h3>ご購入</h3></div>
-        <ol class="pro-steps">
-          <li>下のボタンから購入すると、<b>ライセンスキー</b>が発行されます。</li>
-          <li>届いたキーを下の入力欄に貼り付けて「認証」を押すだけ。アカウント登録は不要です。</li>
-        </ol>
-        <div class="btn-row" style="margin:12px 0">${buyBtn}</div>
-        <div class="field"><label>ライセンスキー（TABIPRO-… で始まる文字列）</label>
-          <textarea id="license-key" placeholder="TABIPRO-XXXX.XXXX" style="min-height:64px;font-family:monospace"></textarea></div>
-        <div class="btn-row"><button class="btn" onclick="App.activateLicense()">🔑 認証する</button></div>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:10px">※ ライセンスはこのブラウザ（端末）に保存されます。機種変更やブラウザ変更の際は、同じキーをもう一度入力してください。認証はオフラインで行われ、個人情報が送信されることはありません。</p>
-      </div>`}
-      <p style="font-size:12px;color:var(--text-muted)">キーを紛失した場合・うまく認証できない場合は「運営者情報・お問い合わせ」からご連絡ください。</p>`;
-  },
-  async activateLicense(){
-    const el=document.getElementById("license-key");const key=el?el.value:"";
-    if(!key.trim()){toast("ライセンスキーを入力してください");return;}
-    toast("認証しています…");
-    const ok=await PRO.activate(key);
-    if(ok){this.celebrate(true);toast("🎉 Pro版が有効になりました！ありがとうございます");this.go("pro");}
-    else toast("キーを認証できませんでした。コピー漏れ（前後の空白・改行）がないかご確認ください");
-  },
-  confirmDeactivateLicense(){
-    this.modal("認証の解除",`<p>この端末のPro認証を解除します。キーをお持ちであれば、いつでも再認証できます。</p>`,
-      [{label:"キャンセル",ghost:true,fn:()=>this.closeModal()},
-       {label:"解除する",danger:true,fn:()=>{PRO.deactivate();this.closeModal();toast("認証を解除しました");this.go("pro");}}]);
-  },
-
   /* ---------- 法定ページ（AdSense必須コンテンツ） ---------- */
   renderPrivacy(){
     return `<button class="back-link" onclick="App.go('home')">← 一覧へ</button>
@@ -3739,8 +3621,6 @@ const App={
       <p>本規約は、「旅のしおり」（以下「当サイト」）の利用に関する条件を定めるものです。利用者は、当サイトを利用することにより本規約に同意したものとみなします。</p>
       <h3>2. サービス内容</h3>
       <p>当サイトは、旅のしおり（旅程表）の作成・共有・記録を支援するWebアプリケーションです。会員登録は不要で、データは利用者の端末内に保存されます。基本機能は無料でご利用いただけます。</p>
-      <h3>2-2. Pro版（有料機能）について</h3>
-      <p>当サイトは、一部の拡張機能（写真枚数の上限解放、全デザインテーマ、画像・印刷の透かし非表示等）を「Pro版」として有償（買い切り）で提供することがあります。Pro版の販売・決済は外部プラットフォーム（BOOTH、Gumroad等）を通じて行い、決済・返金等の条件は当該プラットフォームの規約および販売ページの記載に従います。ライセンスキーは利用者の端末（ブラウザ）内で検証・保存され、第三者への譲渡・転売・公開はできません。無料版の機能制限の内容は、予告なく変更されることがあります（既に作成済みのデータが削除されることはありません）。</p>
       <h3>3. 免責事項</h3>
       <p>当サイトに掲載する情報（移動時間の見積り、スポット情報、住所の自動判定、予約サイトへのリンク等）は、正確性・完全性を保証するものではありません。移動時間は地理情報に基づく概算であり、実際の所要時間は交通状況等により異なります。当サイトの利用、またはブラウザデータの消去・端末の変更等によるデータの消失について、運営者は一切の責任を負いません。重要なしおりはJSON書き出し機能によるバックアップを推奨します。</p>
       <p>当サイトは現状有姿で提供され、動作の完全性、特定目的への適合性を保証しません。運営者は、予告なくサービス内容の変更・提供の中断または終了を行うことがあり、これにより利用者に生じた損害について、運営者の故意または重過失による場合を除き、責任を負いません。</p>
@@ -3879,7 +3759,7 @@ const App={
       ["旅行当日はどんな表示になりますか？","旅行期間中にしおりを開くと<b>旅行中モード</b>になり、「いま」のスポットと「次」のスポット・残り時間・経路ボタンを先頭に表示し、行程表の現在地に「▶いまここ」の目印が付きます。スポットの「訪問する」を押すと<b>「いま」と進行バーが自動で次へ進み</b>、時刻より先に回った場合もチェックが優先されます（訪問済みスポットのアラートは鳴りません）。全部回り切ると紙吹雪でお祝い！ さらに<b>次のスポットの15分前</b>には、チャイム音とバイブ（対応端末）つきの画面内アラートでお知らせします（アプリを開いている間のみ・1分ごとに自動更新）。"],
       ["スマホのホーム画面にアプリとして追加できますか？","はい。<b>iPhone / iPad</b>はSafariで当サイトを開き、共有ボタン（□に↑）→<b>「ホーム画面に追加」</b>を選びます。<b>Android</b>はChromeのメニュー（︙）→<b>「ホーム画面に追加」（または「アプリをインストール」）</b>を選びます。追加したアイコンからアプリのように全画面で起動でき、一度開いた後は<b>オフラインでも起動</b>できます。"],
       ["海外旅行にも使えますか？","はい。おすすめ提案に台北・ソウル・香港・バンコク・シンガポール・グアム・ホノルル・パリ・ロンドンの9都市を収録し、海外のしおりでは現地時間と時差の表示、💱通貨換算メモ、🗣会話フレーズ集（5言語）が使えます。天気予報・精密経路計算も海外に対応しています。"],
-      ["Pro版とは何ですか？無料のままでも使えますか？","はい、基本機能はずっと無料で、しおりも何件でも作成できます。もっと使い込む方向けに、写真枚数の上限解放、全テーマ、画像・印刷の透かしなし等を<b>買い切り¥"+MONETIZE.PRO_PRICE+"</b>で解放する<b>Pro版</b>をご用意しています。くわしくはフッターの「✨ Pro版について」をご覧ください。"],
+      ["利用に料金はかかりますか？","いいえ、すべての機能を無料でご利用いただけます。会員登録も不要です。運営は予約サイト等へのリンク（アフィリエイト）によって support されており、利用者に費用のご負担はありません。"],
       ["予約リンクを経由すると料金が上がりますか？","いいえ。当サイトのリンク（アフィリエイトリンクを含む場合があります）を経由しても、利用者の支払う料金は変わりません。該当リンクには「PR」表記を行っています。"],
       ["天気予報や現在地機能もオフラインで使えますか？","この2つだけは通信が必要です。天気予報はインターネット接続時に取得し、現在地機能はブラウザの位置情報の許可（https接続）が必要です。それ以外の機能はオフラインで動作します。"],
     ];
@@ -4887,7 +4767,6 @@ const App={
         <rect x="30" y="120" width="${Math.round((W-220)*pct/100)}" height="14" rx="7" fill="${v.ac}"/>
       </g>
       <text x="${W/2}" y="${H-58}" font-size="24" fill="${v.mut}" text-anchor="middle">旅のしおり — つくる・のこす・あつめる</text>
-      ${PRO.active?"":`<text x="${W-64}" y="${H-58}" font-size="20" fill="${v.mut}" text-anchor="end" opacity="0.75">Free版で作成</text>`}
     </svg>`;
     this.shareImage("📤 旅のダイジェスト画像",svg,W,H,`shiori_${(t.title||"trip").replace(/\s+/g,"_")}.png`);
   },
@@ -4903,7 +4782,6 @@ const App={
       <svg x="180" y="230" width="720" height="740" viewBox="${MD.vbJP||"0 0 2000 2000"}" preserveAspectRatio="xMidYMid meet">${paths}</svg>
       <text x="${W/2}" y="${H-120}" font-size="30" fill="${v.tx}" text-anchor="middle">訪れた国 ${geo.countries.size} ・ 市町村 ${geo.cities.size}</text>
       <text x="${W/2}" y="${H-64}" font-size="22" fill="${v.mut}" text-anchor="middle">旅のしおり ／ 地図：国土数値情報(国土交通省)を加工</text>
-      ${PRO.active?"":`<text x="${W-64}" y="${H-64}" font-size="20" fill="${v.mut}" text-anchor="end" opacity="0.75">Free版で作成</text>`}
     </svg>`;
     this.shareImage("📤 制覇率シェアカード",svg,W,H,"seiha_card.png");
   },
@@ -4969,7 +4847,7 @@ const App={
     const t=this.current();if(!t)return;const grid=document.getElementById("al-grid");if(!grid)return;
     let photos=[];try{photos=await PhotoStore.listByTrip(t.id);}catch(e){}
     this._albumPhotos=photos;
-    const cnt=document.getElementById("al-count");if(cnt)cnt.textContent=photos.length?(PRO.active?`${photos.length}枚`:`${photos.length}/${PRO.LIMITS.photos}枚（無料版）`):"";
+    const cnt=document.getElementById("al-count");if(cnt)cnt.textContent=photos.length?`${photos.length}枚`:"";
     if(!photos.length){grid.style.columns="unset";grid.innerHTML=`<div class="empty" style="border:none;background:transparent">${ILLUST.sky.svg.replace('<svg','<svg style="color:var(--accent);width:130px"')}<h3>まだ写真がありません</h3><p>旅先の一枚を追加して、思い出をのこしましょう。</p></div>`;return;}
     grid.style.columns="";
     grid.innerHTML=photos.map((p,idx)=>`<div class="photo-cell">
@@ -4982,12 +4860,6 @@ const App={
     let files=[...fileList].filter(f=>f.type.startsWith("image/"));
     if(!files.length){toast("画像ファイルを選んでください");return;}
     const t=this.current();const day=document.getElementById("al-day")?document.getElementById("al-day").value:"";
-    if(!PRO.active){
-      let existing=0;try{existing=(await PhotoStore.listByTrip(t.id)).length;}catch(e){}
-      const remain=PRO.LIMITS.photos-existing;
-      if(remain<=0){this.proModal(`無料版の写真アルバムは1しおり <b>${PRO.LIMITS.photos}枚</b> までです。Pro版なら無制限に追加できます。`);return;}
-      if(files.length>remain){files=files.slice(0,remain);toast(`無料版は1しおり${PRO.LIMITS.photos}枚まで（残り${remain}枚のみ追加します）`);}
-    }
     toast(`${files.length}枚を処理中…`);let ok=0;
     for(const f of files){try{const dataUrl=await fileToDataUrl(f);
       await PhotoStore.add({id:uid(),tripId:t.id,dataUrl,caption:"",day:day||"",createdAt:Date.now()});ok++;
@@ -5019,18 +4891,16 @@ const App={
     const cur=loadAppTheme();const t=this.current();
     const groups=["定番","季節","雰囲気"];
     const sections=groups.map(g=>{
-      const cards=THEMES.filter(th=>th.grp===g).map(th=>{const active=th.id===cur;const locked=this.themeLocked(th.id);
-        return `<button class="theme-card ${locked?"tc-locked":""}" data-theme="${th.id}" aria-pressed="${active}" onclick="App.pickTheme('${th.id}')">
+      const cards=THEMES.filter(th=>th.grp===g).map(th=>{const active=th.id===cur;
+        return `<button class="theme-card" data-theme="${th.id}" aria-pressed="${active}" onclick="App.pickTheme('${th.id}')">
           <div class="tc-preview" style="background:var(--bg)"><div class="swatches">${th.c.map(c=>`<i style="background:${c}"></i>`).join("")}</div>
           <div class="fakeline" style="background:var(--accent);width:60%"></div><div class="fakeline" style="background:var(--border-strong);width:80%;height:5px"></div></div>
-          <div class="tc-body"><div><b>${esc(th.name)}</b><div class="no">${th.no} ・ ${esc(th.desc)}</div></div>${active?'<span class="tc-check">✓ 使用中</span>':(locked?'<span class="tc-pro">🔒 Pro</span>':"")}</div></button>`;
+          <div class="tc-body"><div><b>${esc(th.name)}</b><div class="no">${th.no} ・ ${esc(th.desc)}</div></div>${active?'<span class="tc-check">✓ 使用中</span>':""}</div></button>`;
       }).join("");
       return `<div class="theme-group-label">${g}</div><div class="theme-gallery">${cards}</div>`;
     }).join("");
     return `<h2 class="section-title">デザインを選ぶ（全${THEMES.length}種）</h2>
       <p class="section-sub">アプリ全体の既定テーマを選べます。しおりごとの見た目は「編集」画面でも個別に設定できます。</p>
-      ${PRO.active?`<div class="pro-banner is-pro">✨ Pro版ライセンス認証済み — 全テーマをご利用いただけます</div>`
-        :`<button class="pro-banner" onclick="App.go('pro')">✨ <b>Pro版</b>で全${THEMES.length}テーマ＋写真無制限＋透かしなしに（買い切り ¥${esc(MONETIZE.PRO_PRICE)}）→</button>`}
       <div class="panel" style="margin-bottom:20px"><div class="panel-head"><h3 style="font-size:16px">🔠 文字サイズ</h3></div>
         <div class="season-sel">${[["sm","小"],["md","標準"],["lg","大"],["xl","特大"]].map(([id,lb])=>`<button class="sc ${this.fsMode()===id?"on":""}" onclick="App.setFs('${id}')">${lb}</button>`).join("")}</div></div>
       <div class="panel" style="margin-bottom:20px"><div class="panel-head"><h3 style="font-size:16px">🍃 季節の演出</h3></div>
@@ -5039,14 +4909,12 @@ const App={
       ${sections}
       ${t?`<div class="panel" style="margin-top:26px"><div class="panel-head"><h3>開いているしおりのテーマ</h3></div>
         <p class="section-sub" style="margin-bottom:12px">「${esc(t.title||"無題")}」の見た目だけを変更します。</p>
-        <select onchange="App.setTripTheme(this.value)">${THEMES.map(th=>`<option value="${th.id}" ${th.id===t.theme?"selected":""}>${this.themeLocked(th.id)?"🔒 ":""}${th.no} ${th.name}${this.themeLocked(th.id)?"（Pro）":""}</option>`).join("")}</select></div>`:""}`;
+        <select onchange="App.setTripTheme(this.value)">${THEMES.map(th=>`<option value="${th.id}" ${th.id===t.theme?"selected":""}>${th.no} ${th.name}</option>`).join("")}</select></div>`:""}`;
   },
   pickTheme(id){
-    if(this.themeLocked(id)){this.proModal(`テーマ「<b>${esc(themeById(id).name)}</b>」はPro版限定です。無料版では「定番」の${PRO.LIMITS.themes.length}種をお使いいただけます。`);return;}
     saveAppTheme(id);document.documentElement.setAttribute("data-theme",id);this.go("themes");toast(`テーマ「${themeById(id).name}」に変更しました`);},
   setTripTheme(id){
     const t=this.current();if(!t)return;
-    if(this.themeLocked(id)){this.proModal(`テーマ「<b>${esc(themeById(id).name)}</b>」はPro版限定です。`);this.go("themes");return;}
     t.theme=id;t.updatedAt=Date.now();this.save();toast("しおりのテーマを更新しました");},
 
   /* ---------- 共有 ---------- */
